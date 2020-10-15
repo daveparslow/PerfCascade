@@ -2,21 +2,6 @@
  *  Misc Helpers
  */
 
-/**
- * Parses URL into its components
- * @param  {string} url
- */
-function parseUrl(url: string) {
-  const pattern = RegExp("^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?");
-  const matches = url.match(pattern) || [];
-  return {
-    authority: matches[4],
-    fragment: matches[9],
-    path: matches[5],
-    query: matches[7],
-    scheme: matches[2],
-  };
-}
 
 /**
  * @param  {T[]} arr - array to search
@@ -70,21 +55,21 @@ export function resourceUrlFormatter(url: string, maxLength: number): string {
   if (url.length < maxLength) {
     return url.replace(/https?:\/\//, "");
   }
+  return url;
+  // const matches = parseUrl(url);
 
-  const matches = parseUrl(url);
+  // if ((matches.authority + matches.path).length < maxLength) {
+  //   return matches.authority + matches.path;
+  // }
 
-  if ((matches.authority + matches.path).length < maxLength) {
-    return matches.authority + matches.path;
-  }
-
-  const maxAuthLength = Math.floor(maxLength / 2) - 3;
-  const maxPathLength = Math.floor(maxLength / 2) - 5;
-  // maybe we could fine tune these numbers
-  const p = matches.path.split("/");
-  if (matches.authority.length > maxAuthLength) {
-    return matches.authority.substr(0, maxAuthLength) + "..." + p[p.length - 1].substr(-maxPathLength);
-  }
-  return matches.authority + "..." + p[p.length - 1].substr(-maxPathLength);
+  // const maxAuthLength = Math.floor(maxLength / 2) - 3;
+  // const maxPathLength = Math.floor(maxLength / 2) - 5;
+  // // maybe we could fine tune these numbers
+  // const p = matches.path.split("/");
+  // if (matches.authority.length > maxAuthLength) {
+  //   return matches.authority.substr(0, maxAuthLength) + "..." + p[p.length - 1].substr(-maxPathLength);
+  // }
+  // return matches.authority + "..." + p[p.length - 1].substr(-maxPathLength);
 }
 
 /**

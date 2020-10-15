@@ -21,10 +21,15 @@ import {
 function makeBlock(rectData: RectData, className: string) {
   const holder = svg.newG("");
   const blockHeight = rectData.height - 1;
+  let defaultWidth = misc.roundNumber(rectData.width / rectData.unit);
+  if (defaultWidth < .1) {
+    defaultWidth = .1;
+  }
+
   const rectX = misc.roundNumber(rectData.x / rectData.unit) + "%";
   const rect = svg.newRect({
     height: blockHeight,
-    width: misc.roundNumber(rectData.width / rectData.unit) + "%",
+    width: defaultWidth + "%",
     x: rectX,
     y: rectData.y,
   }, className);

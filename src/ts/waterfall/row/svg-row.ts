@@ -2,7 +2,6 @@ import * as icons from "../../helpers/icons";
 import {
   isTabDown,
   isTabUp,
-  resourceUrlFormatter,
 } from "../../helpers/misc";
 import * as svg from "../../helpers/svg";
 import { Context } from "../../typing/context";
@@ -76,7 +75,7 @@ export function createRow(context: Context, index: number,
   const requestNumberLabel = rowSubComponents.createRequestNumberLabel(x, y, requestNumber, rowHeight, maxNumberWidth);
   // 4 is slightly bigger than the hover "glow" around the url
   x += maxNumberWidth + 4;
-  const shortLabel = rowSubComponents.createRequestLabelClipped(x, y, resourceUrlFormatter(entry.url, 40),
+  const shortLabel = rowSubComponents.createRequestLabelClipped(x, y, entry.url,
     rowHeight);
   const fullLabel = rowSubComponents.createRequestLabelFull(x, y, entry.url, rowHeight);
 

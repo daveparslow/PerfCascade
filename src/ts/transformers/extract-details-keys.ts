@@ -27,10 +27,28 @@ const notEmpty = (kv: KvTuple) => {
   return kv.length > 1 && kv[1] !== undefined && kv[1] !== "";
 };
 
+interface IDateTimeFormatOptions  extends Intl.DateTimeFormatOptions {
+  fractionalSecondDigits: number;
+}
+
+const format: IDateTimeFormatOptions = {
+  day: "numeric",
+  fractionalSecondDigits: 3,
+  hour: "numeric",
+  hour12: true,
+  minute: "numeric",
+  month: "numeric",
+  second: "numeric",
+  timeZone: "UTC",
+  weekday: "long",
+  year: "numeric",
+};
+
 function parseGeneralDetails(entry: Entry, startRelative: number, requestID: number): SafeKvTuple[] {
   return ([
     ["Request Number", `#${requestID}`],
-    ["Started", new Date(entry.startedDateTime).toLocaleString() + ((startRelative > 0) ?
+    ["Started", new Date(entry.startedDateTime).toLocaleString(undefined, format)
+      + ((startRelative > 0) ?
       " (" + formatMilliseconds(startRelative) + " after page request started)" : "")],
     ["Duration", formatMilliseconds(entry.time)],
     ["Error/Status Code", entry.response.status + " " + entry.response.statusText],

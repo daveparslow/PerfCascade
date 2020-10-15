@@ -77,7 +77,7 @@ const getPages = (data: Log) => {
     const currDate = Date.parse(curr.startedDateTime);
     const earliestDate = Date.parse(earliest);
     return earliestDate < currDate ? earliest : curr.startedDateTime;
-  }, data.entries[0].startedDateTime);
+  }, (data.entries[0] && data.entries[0].startedDateTime) );
   return [{
     id: "",
     pageTimings: {},
@@ -101,9 +101,6 @@ export function transformPage(harData: Har | Log,
 
   const pages = getPages(data);
   const currPage = pages[pageIndex];
-  if (!currPage.startedDateTime) {
-    throw new TypeError(`Invalid HAR document: "log.pages[${pageIndex}].startedDateTime" is not set`);
-  }
   const pageStartTime = new Date(currPage.startedDateTime).getTime();
   const pageTimings = currPage.pageTimings;
 

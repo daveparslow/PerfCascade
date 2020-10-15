@@ -2,14 +2,14 @@
   "name": "perf-cascade",
   "version": "2.7.0",
   "description": "Har file visualizer",
-  "main": "./dist/perf-cascade.js",
-  "module": "./index.js",
+  "main": "./main/index.js",
+  "module": "./main/index.js",
   "style": "./dist/perf-cascade.css",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "grunt tslint",
-    "watch": "npm run start & grunt default",
-    "build": "npm run lint & grunt releaseBuild",
+    "watch": "tsc -w",
+    "build": "tsc",
     "start": "live-server --watch=build/stage/,src/index.html --ignore=build/stage/temp/ --open=src/index.html",
     "clearJS": "find ./src/ts -iname \"*.js\" -delete && find ./src/ts -iname \"*.map\" -delete",
     "ghPages": "grunt ghPages",
@@ -31,7 +31,6 @@
     "lib": "./lib",
     "dist": "./dist"
   },
-  "types": "./index.d.ts",
   "license": "MIT",
   "devDependencies": {
     "conventional-changelog": "^3.0.5",

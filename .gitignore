@@ -7,6 +7,7 @@ src/ts/.baseDir.ts
 #Build dirs
 build/
 .release/
+lib/
 
 #Environment variables
 ENV_VARS

@@ -119,7 +119,7 @@ export function createWaterfallSvg(data: WaterfallData, options: ChartRenderOpti
   scaleAndMarksHolder.appendChild(svgMarks.createMarks(context, data.marks));
 
   // This assumes all icons (mime and indicators) have the same width
-  const perIconWidth = entriesToShow[0].responseDetails.icon.width;
+  const perIconWidth = entriesToShow[0] && entriesToShow[0].responseDetails.icon.width;
 
   let maxIcons = 0;
 
