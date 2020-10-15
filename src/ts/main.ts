@@ -6,6 +6,8 @@ import * as HarTransformer from "./transformers/har";
 import { ChartOptions, ChartRenderOption, HarTransformerOptions } from "./typing/options";
 import { WaterfallDocs } from "./typing/waterfall";
 import { createWaterfallSvg } from "./waterfall/svg-chart";
+export { addIconFromPath } from "./helpers/icon";
+export { addCustomMimeType  } from "./transformers/helpers";
 
 /** default options to use if not set in `options` parameter */
 const defaultChartOptions: Readonly<ChartOptions> = {

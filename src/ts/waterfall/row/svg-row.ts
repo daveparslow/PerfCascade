@@ -1,4 +1,5 @@
-import * as icons from "../../helpers/icons";
+
+import { getIcon } from "../../helpers/icon";
 import {
   isTabDown,
   isTabUp,
@@ -56,14 +57,14 @@ export function createRow(context: Context, index: number,
   if (context.options.showMimeTypeIcon) {
     const icon = entry.responseDetails.icon;
     x -= icon.width;
-    rowName.appendChild(icons[icon.type](x, y + 3, icon.title));
+    rowName.appendChild(getIcon(icon.type)(x, y + 3, icon.title));
   }
 
   if (context.options.showIndicatorIcons) {
     // Create and add warnings for potentia;l issues
     getIndicatorIcons(entry).forEach((icon) => {
       x -= icon.width;
-      rowName.appendChild(icons[icon.type](x, y + 3, icon.title));
+      rowName.appendChild(getIcon(icon.type)(x, y + 3, icon.title));
     });
   }
 

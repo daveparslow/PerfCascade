@@ -1,6 +1,6 @@
 import { makeBodyEl, makeHtmlEl } from "../../helpers/dom";
 import { escapeHtml, sanitizeUrlForLink } from "../../helpers/parse";
-import { WaterfallEntry } from "../../typing/waterfall";
+import { RequestType, WaterfallEntry } from "../../typing/waterfall";
 
 /**
  * Creates the HTML body for the overlay
@@ -37,12 +37,20 @@ export function createDetailsBody(requestID: number, detailsHeight: number, entr
     return `<div class="tab ${cssClasses}">${content}</div>`;
   }).join("\n");
 
+  let url;
+  if (entry.url && entry.url.startsWith("http")) {
+    url = `<a href="${sanitizeUrlForLink(entry.url)}">
+      ${escapeHtml(entry.url)}
+    </a>`;
+  } else {
+    url =   escapeHtml(entry.url);
+  }
+
+  const normalizedRequestType = normalizeRequestType(entry.responseDetails.requestType);
   body.innerHTML = `
     <div class="wrapper">
-      <header class="type-${entry.responseDetails.requestType}">
-        <h3><strong>#${requestID}</strong> <a href="${sanitizeUrlForLink(entry.url)}">
-          ${escapeHtml(entry.url)}
-        </a></h3>
+      <header class="type-${normalizedRequestType}">
+        <h3><strong>#${requestID}</strong> ${url}</h3>
         <nav class="tab-nav">
           <ul>
             ${tabMenu}
@@ -55,4 +63,25 @@ export function createDetailsBody(requestID: number, detailsHeight: number, entr
 
   html.appendChild(body);
   return html;
+}
+
+const requestTypeMapping: { [key: string]: RequestType} = {
+  audio: "audio",
+  css: "css",
+  flash: "flash",
+  font: "font",
+  html: "html",
+  image: "image",
+  javascript: "javascript",
+  other: "other",
+  svg: "svg",
+  video: "video",
+};
+
+function normalizeRequestType(requestType: string): RequestType {
+  const mapping = requestTypeMapping[requestType];
+  if (!mapping) {
+    return "javascript";
+  }
+  return mapping;
 }

@@ -3,8 +3,11 @@ import * as svgLib from "./svg";
  *  SVG Icons
  */
 
-const wrapSvgIcon = (x: string | number, y: number, title: string,
-                     className: string, scale: number, svgEl: SVGElement): SVGElement => {
+export type IconCreator = (x: number, y: number, title: string, scale?: number) => SVGElement;
+
+export const wrapSvgIcon = (
+  x: string | number, y: number, title: string,
+  className: string, scale: number, svgEl: SVGElement): SVGElement => {
   const holder = svgLib.newSvg("", {
     x,
     y,
@@ -236,4 +239,21 @@ export function audio(x: number, y: number, title: string, scale: number = 1): S
     audioIconLazy = svgLib.newPath(d);
   }
   return wrapSvgIcon(x, y, title, "icon-audio", scale, audioIconLazy.cloneNode(false) as SVGPathElement);
+}
+
+export function makeIconCreator(
+  path: string,
+  className: string,
+  customize?: (element: SVGElement) => void): IconCreator {
+  let iconLazy: SVGPathElement;
+  return function icon(x: number, y: number, title: string, scale: number = 1): SVGElement {
+    if (iconLazy === undefined) {
+      iconLazy = svgLib.newPath(path);
+    }
+    const svgElement = wrapSvgIcon(x, y, title, className, scale, iconLazy.cloneNode(false) as SVGPathElement);
+    if (customize) {
+      customize(svgElement);
+    }
+    return svgElement;
+  };
 }

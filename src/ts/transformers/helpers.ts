@@ -46,6 +46,11 @@ export function mimeToRequestType(mimeType: string): RequestType {
   if (mimeType === undefined) {
     return "other";
   }
+  const customRequestType = customMimeTypes[mimeType];
+  if (customRequestType) {
+    return customRequestType as RequestType;
+  }
+
   const types = mimeType.split("/");
   let part2 = types[1];
   // take care of text/css; charset=UTF-8 etc
@@ -82,6 +87,12 @@ export function mimeToRequestType(mimeType: string): RequestType {
     case "x-shockwave-flash": return "flash";
     default: return "other";
   }
+}
+
+const customMimeTypes: { [mimeType: string]: string } = {};
+
+export function addCustomMimeType(mimeType: string, requestType: string) {
+  customMimeTypes[mimeType] = requestType;
 }
 
 /** helper to create a `WaterfallEntry` */
