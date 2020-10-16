@@ -16,7 +16,8 @@
     "esModuleInterop": true,
     "typeRoots": [],
     "types": [],
-    "rootDir": "src/ts"
+    "rootDir": "src/ts",
+    "jsx": "react"
   },
   "exclude": [
     "node_modules",

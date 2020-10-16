@@ -1,5 +1,5 @@
-import { ChartRenderOption } from "../typing/options";
-import { roundNumber } from "./misc";
+import { ChartRenderOption } from '../typing/options';
+import { roundNumber } from './misc';
 
 export type MaybeStringOrNumber = string | number | undefined | null;
 
@@ -12,9 +12,11 @@ export type MaybeStringOrNumber = string | number | undefined | null;
  * @param formatFn an optional function to format the parsed input value.
  * @returns {string} a formatted string representation of the input, or undefined.
  */
-export function parseAndFormat<S, T>(input: S | undefined,
-                                     parseFn: ((_: S) => T),
-                                     formatFn: ((_: T) => string | undefined) = toString): string | undefined {
+export function parseAndFormat<S, T>(
+  input: S | undefined,
+  parseFn: (_: S) => T,
+  formatFn: (_: T) => string | undefined = toString
+): string | undefined {
   if (input === undefined) {
     return undefined;
   }
@@ -25,8 +27,8 @@ export function parseAndFormat<S, T>(input: S | undefined,
   return formatFn(parsed);
 }
 
-function toString<T>(source: T): string {
-  if (typeof source["toString"] === "function") {
+function toString<T extends Object>(source: T): string {
+  if (typeof source['toString'] === 'function') {
     return source.toString();
   } else {
     throw TypeError(`Can't convert type ${typeof source} to string`);
@@ -49,7 +51,7 @@ export function parseNonNegative(input: MaybeStringOrNumber): number | undefined
   if (input === undefined || input === null) {
     return undefined;
   }
-  const filter = (n) => (n >= 0);
+  const filter = n => n >= 0;
   return parseToNumber(input, filter);
 }
 
@@ -57,14 +59,14 @@ export function parsePositive(input: MaybeStringOrNumber): number | undefined {
   if (input === undefined || input === null) {
     return undefined;
   }
-  const filter = (n) => (n > 0);
+  const filter = n => n > 0;
   return parseToNumber(input, filter);
 }
 
 function parseToNumber(input: string | number, filterFn: (_: number) => boolean): number | undefined {
-  const filter = (n: number) => filterFn(n) ? n : undefined;
+  const filter = (n: number) => (filterFn(n) ? n : undefined);
 
-  if (typeof input === "string") {
+  if (typeof input === 'string') {
     const n = parseInt(input, 10);
     if (!isFinite(n)) {
       return undefined;
@@ -74,8 +76,8 @@ function parseToNumber(input: string | number, filterFn: (_: number) => boolean)
   return filter(input);
 }
 
-export function formatMilliseconds(millis: number | undefined): string | undefined {
-  return (millis !== undefined) ? `${roundNumber(millis, 3)} ms` : undefined;
+export function formatMilliseconds(milliseconds: number | undefined): string | undefined {
+  return milliseconds !== undefined ? `${roundNumber(milliseconds, 3)} ms` : undefined;
 }
 
 const secondsPerMinute = 60;
@@ -101,7 +103,7 @@ export function formatSeconds(seconds: number | undefined): string | undefined {
 }
 
 export function formatDateLocalized(date: Date | undefined): string | undefined {
-  return (date !== undefined) ? `${date.toUTCString()}<br/>(local time: ${date.toLocaleString()})` : undefined;
+  return date !== undefined ? `${date.toUTCString()}<br/>(local time: ${date.toLocaleString()})` : undefined;
 }
 
 const bytesPerKB = 1024;
@@ -109,7 +111,7 @@ const bytesPerMB = 1024 * bytesPerKB;
 
 export function formatBytes(bytes: number | undefined): string {
   if (bytes === undefined) {
-    return "";
+    return '';
   }
   const raw = `${bytes} bytes`;
   if (bytes >= bytesPerMB) {
@@ -123,65 +125,65 @@ export function formatBytes(bytes: number | undefined): string {
 
 /** HTML character to escape */
 const htmlCharMap = {
-  "\"": "&quot",
-  "&": "&amp",
-  "'": "&#039",
-  "<": "&lt",
-  ">": "&gt",
+  '"': '&quot',
+  '&': '&amp',
+  "'": '&#039',
+  '<': '&lt',
+  '>': '&gt'
 };
 /**
  * Reusable regex to escape HTML chars
  * Combined to improve performance
  */
-const htmlChars = new RegExp(Object.keys(htmlCharMap).join("|"), "g");
+const htmlChars = new RegExp(Object.keys(htmlCharMap).join('|'), 'g');
 
 /**
  * Escapes unsafe characters in a string to render safely in HTML
  * @param  {string} unsafe - string to be rendered in HTML
  */
-export function escapeHtml(unsafe: MaybeStringOrNumber | boolean = ""): string {
+export function escapeHtml(unsafe: MaybeStringOrNumber | boolean = ''): string {
   if (unsafe === null || unsafe === undefined) {
-    return ""; // See https://github.com/micmro/PerfCascade/issues/217
+    return ''; // See https://github.com/micmro/PerfCascade/issues/217
   }
-  if (typeof unsafe !== "string") {
-    if (typeof unsafe["toString"] === "function") {
+  if (typeof unsafe !== 'string') {
+    if (typeof unsafe['toString'] === 'function') {
       unsafe = unsafe.toString();
     } else {
-      throw TypeError("Invalid parameter");
+      throw TypeError('Invalid parameter');
     }
   }
-  return unsafe.replace(htmlChars, (match) => {
+  return unsafe.replace(htmlChars, match => {
     return htmlCharMap[match];
   });
 }
 
 /** Whitelist of save-ish URL chars */
-const unSafeUrlChars = new RegExp("[^-A-Za-z0-9+&@#/%?=~_|!:,.;\(\)]", "g");
+const unSafeUrlChars = new RegExp('[^-A-Za-z0-9+&@#/%?=~_|!:,.;()]', 'g');
 
 /** returns a cleaned http:// or https:// based URL  */
 export function sanitizeUrlForLink(unsafeUrl: string) {
-  const cleaned = unsafeUrl.replace(unSafeUrlChars, "_");
-  if (cleaned.indexOf("http://") === 0 || cleaned.indexOf("https://") === 0) {
+  const cleaned = unsafeUrl.replace(unSafeUrlChars, '_');
+  if (cleaned.indexOf('http://') === 0 || cleaned.indexOf('https://') === 0) {
     return cleaned;
   }
   // tslint:disable-next-line:no-console
-  console.warn("skipped link, due to potentially unsafe url", unsafeUrl);
-  return "";
+  console.warn('skipped link, due to potentially unsafe url', unsafeUrl);
+  return '';
 }
 
 /** whitelist basic chars */
-const requestTypeTypeRegEx = new RegExp("[^a-zA-Z0-9]", "g");
+const requestTypeTypeRegEx = new RegExp('[^a-zA-Z0-9]', 'g');
 
-/**  returns cleaned sting - stipps out not a-zA-Z0-9 */
+/**  returns cleaned sting - strips out not a-zA-Z0-9 */
 export function sanitizeAlphaNumeric(unsafe: string | number) {
-  return unsafe.toString().replace(requestTypeTypeRegEx, "");
+  return unsafe.toString().replace(requestTypeTypeRegEx, '');
 }
 
 /** Ensures `input` is casted to `number` */
 export function toInt(input: MaybeStringOrNumber): number | undefined {
-  if (typeof input === "number") {
+  if (typeof input === 'number') {
     return input;
-  } else if (typeof input === "string") {
+  } else if (typeof input === 'string') {
     return parseInt(input, 10);
   } else {
     return undefined;
@@ -201,12 +203,12 @@ export function validateOptions(options: ChartRenderOption): ChartRenderOption {
     options[name] = !!options[name];
   };
 
-  validateInt("leftColumnWidth");
-  validateInt("rowHeight");
-  validateInt("selectedPage");
-  ensureBoolean("showAlignmentHelpers");
-  ensureBoolean("showIndicatorIcons");
-  ensureBoolean("showMimeTypeIcon");
+  validateInt('leftColumnWidth');
+  validateInt('rowHeight');
+  validateInt('selectedPage');
+  ensureBoolean('showAlignmentHelpers');
+  ensureBoolean('showIndicatorIcons');
+  ensureBoolean('showMimeTypeIcon');
 
   return options;
 }

@@ -1,10 +1,20 @@
-export type TimingType = "blocked" | "dns" | "connect" | "send" | "wait" | "receive" | "ssl";
-export type RequestType = "other" | "image" | "video" | "audio" | "font" | "svg" |  "html" |
-  "plain" | "css" | "javascript" | "flash";
+export type TimingType = 'blocked' | 'dns' | 'connect' | 'send' | 'wait' | 'receive' | 'ssl';
+export type RequestType =
+  | 'other'
+  | 'image'
+  | 'video'
+  | 'audio'
+  | 'font'
+  | 'svg'
+  | 'html'
+  | 'plain'
+  | 'css'
+  | 'javascript'
+  | 'flash';
 
-export type IndicatorType = "error" | "warning" | "info";
+export type IndicatorType = 'error' | 'warning' | 'info';
 
-export type IndicatorDisplayType = "icon" | "inline";
+export type IndicatorDisplayType = 'icon' | 'inline';
 
 /** Typing for a event, e.g. UserTiming API performance mark from WPT */
 export interface UserTiming {
@@ -37,6 +47,7 @@ export interface WaterfallEntry {
 }
 
 export type TabRenderer = (detailsHeight: number) => string;
+export type TabReactRenderer = (detailsHeight: number) => JSX.Element;
 
 /** Represents a single tab of a `WaterfallEntry` */
 export interface WaterfallEntryTab {
@@ -46,6 +57,7 @@ export interface WaterfallEntryTab {
   content?: string;
   /** lazy evaluation to create stringified tab HTML */
   renderContent?: TabRenderer;
+  renderTab?: TabReactRenderer;
   /** Add an additional CSS class-name to the tab */
   tabClass?: string;
 }
