@@ -6,12 +6,10 @@ import {
   RequestType,
   SafeKvTuple,
   TabReactRenderer,
-  TabRenderer,
   WaterfallEntryIndicator,
   WaterfallEntryTab
 } from '../typing/waterfall';
 import { getKeys } from './extract-details-keys';
-import { makeDefinitionList } from './helpers';
 
 const escapedNewLineRegex = /\\n/g;
 const newLineRegex = /\n/g;
@@ -42,7 +40,7 @@ export function makeTabs(
   tabs.push(makeGeneralTab(tabsData.general, indicators));
   tabs.push(makeRequestTab(tabsData.request, tabsData.requestHeaders));
   tabs.push(makeResponseTab(tabsData.response, tabsData.responseHeaders));
-  tabs.push(makeWaterfallEntryTab('Timings', makeDefinitionList(tabsData.timings, true)));
+  tabs.push(makeLazyWaterfallEntryTab('Timings', () => definitionList(tabsData.timings, true)));
   tabs.push(makeRawData(entry));
   if (requestType === 'image' && entry.request.url.startsWith('http')) {
     tabs.push(makeImgTab(entry));
@@ -57,24 +55,13 @@ export function makeTabs(
   return tabs.filter(t => t !== undefined);
 }
 
-/** Helper to create `WaterfallEntryTab` object literal  */
-function makeWaterfallEntryTab(title: string, content: string, tabClass: string = ''): WaterfallEntryTab {
-  return {
-    content,
-    tabClass,
-    title
-  };
-}
-
 /** Helper to create `WaterfallEntryTab` object literal that is evaluated lazily at runtime (e.g. for performance) */
 function makeLazyWaterfallEntryTab(
   title: string,
-  renderContent?: TabRenderer,
-  tabClass: string = '',
-  renderTab?: TabReactRenderer
+  renderTab?: TabReactRenderer,
+  tabClass: string = ''
 ): WaterfallEntryTab {
   return {
-    renderContent,
     renderTab,
     tabClass,
     title
@@ -88,7 +75,7 @@ function makeGeneralTab(
 ): WaterfallEntryTab {
   const mainContent = definitionList(generalData);
   if (indicators.length === 0) {
-    return makeLazyWaterfallEntryTab('General', undefined, undefined, () => mainContent);
+    return makeLazyWaterfallEntryTab('General', () => mainContent);
   }
 
   // Make indicator sections
@@ -101,7 +88,7 @@ function makeGeneralTab(
     .filter(i => i.type !== 'error' && i.type !== 'warning')
     .map(i => [i.title, i.description] as SafeKvTuple);
 
-  return makeLazyWaterfallEntryTab('General', undefined, undefined, () => (
+  return makeLazyWaterfallEntryTab('General', () => (
     <>
       {errors.length > 0 ? (
         <>
@@ -147,7 +134,7 @@ export function definitionList(dlKeyValues: SafeKvTuple[], addClass: boolean = f
 }
 
 function makeRequestTab(request: SafeKvTuple[], requestHeaders: SafeKvTuple[]): WaterfallEntryTab {
-  return makeLazyWaterfallEntryTab('Request', undefined, undefined, () => (
+  return makeLazyWaterfallEntryTab('Request', () => (
     <>
       <dl>{definitionList(request)}</dl>
       <h2>All Response Headers</h2>
@@ -157,7 +144,7 @@ function makeRequestTab(request: SafeKvTuple[], requestHeaders: SafeKvTuple[]): 
 }
 
 function makeResponseTab(response: SafeKvTuple[], responseHeaders: SafeKvTuple[]): WaterfallEntryTab {
-  return makeLazyWaterfallEntryTab('Response', undefined, undefined, () => (
+  return makeLazyWaterfallEntryTab('Response', () => (
     <>
       <dl>{definitionList(response)}</dl>
       <h2>All Response Headers</h2>
@@ -175,8 +162,6 @@ function makeContentTab(entry: Entry) {
   return makeLazyWaterfallEntryTab(
     `Content (${lineCount} Line${lineCount > 1 ? 's' : ''})`,
     // class `copy-tab-data` needed to catch bubbled up click event in `details-overlay/html-details-body.ts`
-    undefined,
-    'content rendered-data',
     () => (
       <>
         <button className="copy-tab-data">Copy Content to Clipboard</button>
@@ -184,27 +169,32 @@ function makeContentTab(entry: Entry) {
           <code>{unescapedText}</code>
         </pre>
       </>
-    )
+    ),
+    'content rendered-data'
   );
 }
 
 function makeRawData(entry: Entry) {
-  return makeLazyWaterfallEntryTab('Raw Data', undefined, 'raw-data rendered-data', () => {
-    // class `copy-tab-data` needed to catch bubbled up click event in `details-overlay/html-details-body.ts`
-    return (
-      <>
-        <button className="copy-tab-data">Copy Raw Data to Clipboard</button>
-        <pre>
-          <code>{JSON.stringify(entry, null, 2)}</code>
-        </pre>
-      </>
-    );
-  });
+  return makeLazyWaterfallEntryTab(
+    'Raw Data',
+    () => {
+      // class `copy-tab-data` needed to catch bubbled up click event in `details-overlay/html-details-body.ts`
+      return (
+        <>
+          <button className="copy-tab-data">Copy Raw Data to Clipboard</button>
+          <pre>
+            <code>{JSON.stringify(entry, null, 2)}</code>
+          </pre>
+        </>
+      );
+    },
+    'raw-data rendered-data'
+  );
 }
 
 /** Image preview tab */
 function makeImgTab(entry: Entry): WaterfallEntryTab {
-  return makeLazyWaterfallEntryTab('Preview', undefined, undefined, (detailsHeight: number) => (
+  return makeLazyWaterfallEntryTab('Preview', (detailsHeight: number) => (
     <img
       className="preview"
       style={{ maxHeight: `${detailsHeight - 100}px` }}

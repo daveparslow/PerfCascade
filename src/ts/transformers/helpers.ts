@@ -1,7 +1,7 @@
 /** Helpers that are not file-fromat specific */
-import { isInStatusCodeRange, toCssClass } from '../helpers/misc';
+import { isInStatusCodeRange } from '../helpers/misc';
 import { escapeHtml, sanitizeAlphaNumeric } from '../helpers/parse';
-import { RequestType, SafeKvTuple } from '../typing/waterfall';
+import { RequestType } from '../typing/waterfall';
 import {
   Icon,
   KvTuple,
@@ -12,34 +12,6 @@ import {
   WaterfallResponseDetails
 } from '../typing/waterfall';
 import { makeIcon } from '../waterfall/row/svg-indicators';
-
-/** Escapes all HTML except linebreaks `<br/>` */
-const escapeHtmlLight = (str: string) => escapeHtml(str).replace('&ltbr/&gt', '<br/>');
-
-/**
- * Converts `dlKeyValues` to the contennd a definition list, without the outer `<dl>` tags
- * @param {SafeKvTuple[]} dlKeyValues array of Key/Value pair
- * @param {boolean} [addClass=false] if `true` the key in `dlKeyValues`
- * is converted to a class name andd added to the `<dt>`
- * @returns {string} stringified HTML definition list
- */
-export function makeDefinitionList(dlKeyValues: SafeKvTuple[], addClass: boolean = false) {
-  const makeClass = (key: string) => {
-    if (!addClass) {
-      return '';
-    }
-    const className = toCssClass(key) || 'no-colour';
-    return `class="${className}"`;
-  };
-  return dlKeyValues
-    .map(
-      tuple => `
-      <dt ${makeClass(tuple[0])}>${escapeHtmlLight(tuple[0])}</dt>
-      <dd>${escapeHtmlLight(tuple[1])}</dd>
-    `
-    )
-    .join('');
-}
 
 /**
  * Convert a MIME type into it's WPT style request type (font, script etc)

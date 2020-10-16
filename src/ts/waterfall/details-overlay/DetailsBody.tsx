@@ -35,20 +35,11 @@ export function Header(props: IHeaderProps): JSX.Element {
         </nav>
       </header>
       {tabs.map(tab => {
-        let content = '';
-        if (tab.content) {
-          content = tab.content;
-          return <div className={`tab ${tab.tabClass}`} dangerouslySetInnerHTML={{ __html: content }}></div>;
-        } else if (typeof tab.renderTab === 'function') {
+        if (typeof tab.renderTab === 'function') {
           return <div className={`tab ${tab.tabClass}`}>{tab.renderTab(detailsHeight)}</div>;
-        } else if (typeof tab.renderContent === 'function') {
-          content = tab.renderContent(detailsHeight);
-          // keep content for later
-          tab.content = content;
-          return <div className={`tab ${tab.tabClass}`} dangerouslySetInnerHTML={{ __html: content }}></div>;
         }
 
-        return <div className={`tab ${tab.tabClass}`} dangerouslySetInnerHTML={{ __html: content }}></div>;
+        return null;
       })}
     </>
   );

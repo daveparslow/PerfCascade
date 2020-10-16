@@ -46,17 +46,14 @@ export interface WaterfallEntry {
   tabs: WaterfallEntryTab[];
 }
 
-export type TabRenderer = (detailsHeight: number) => string;
 export type TabReactRenderer = (detailsHeight: number) => JSX.Element;
 
 /** Represents a single tab of a `WaterfallEntry` */
 export interface WaterfallEntryTab {
   /** Tab title to show in tab-menu */
   title: string;
-  /** stringified tab HTML */
-  content?: string;
+
   /** lazy evaluation to create stringified tab HTML */
-  renderContent?: TabRenderer;
   renderTab?: TabReactRenderer;
   /** Add an additional CSS class-name to the tab */
   tabClass?: string;
