@@ -36,7 +36,11 @@ export function Header(props: IHeaderProps): JSX.Element {
       </header>
       {tabs.map(tab => {
         if (typeof tab.renderTab === 'function') {
-          return <div className={`tab ${tab.tabClass}`}>{tab.renderTab(detailsHeight)}</div>;
+          return (
+            <div key={tab.title} className={`tab ${tab.tabClass}`}>
+              {tab.renderTab(detailsHeight)}
+            </div>
+          );
         }
 
         return null;
@@ -58,7 +62,6 @@ export function Title(props: React.PropsWithChildren<ITitleProps>): JSX.Element 
 }
 
 export function renderDetails(props: IHeaderProps, root: HTMLElement): void {
-  debugger;
   ReactDom.render(<Header {...props}></Header>, root);
 }
 

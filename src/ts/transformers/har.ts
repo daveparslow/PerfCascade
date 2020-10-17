@@ -1,13 +1,7 @@
-import {
-  Entry,
-  Har,
-  Log,
-  Page,
-  PageTiming,
-} from "har-format";
-import { roundNumber } from "../helpers/misc";
-import { escapeHtml, toInt } from "../helpers/parse";
-import { ChartOptions, HarTransformerOptions } from "../typing/options";
+import { Entry, Har, Log, Page, PageTiming } from 'har-format';
+import { roundNumber } from '../helpers/misc';
+import { escapeHtml, toInt } from '../helpers/parse';
+import { ChartOptions, HarTransformerOptions } from '../typing/options';
 import {
   Mark,
   TimingType,
@@ -17,17 +11,17 @@ import {
   WaterfallEntry,
   WaterfallEntryIndicator,
   WaterfallEntryTiming,
-  WaterfallResponseDetails,
-} from "../typing/waterfall";
-import { collectIndicators, documentIsSecure } from "./har-heuristics";
-import { makeTabs } from "./har-tabs";
+  WaterfallResponseDetails
+} from '../typing/waterfall';
+import { collectIndicators, documentIsSecure } from './har-heuristics';
+import { makeTabs } from './har-tabs';
 import {
   createWaterfallEntry,
   createWaterfallEntryTiming,
   makeMimeTypeIcon,
   makeRowCssClasses,
-  mimeToRequestType,
-} from "./helpers";
+  mimeToRequestType
+} from './helpers';
 
 /**
  * Transforms the full HAR doc, including all pages
@@ -37,11 +31,11 @@ import {
  */
 export function transformDoc(harData: Har | Log, options: HarTransformerOptions): WaterfallDocs {
   // make sure it's the *.log base node
-  const data = (harData["log"] !== undefined ? harData["log"] : harData) as Log;
+  const data = (harData['log'] !== undefined ? harData['log'] : harData) as Log;
   const pages = getPages(data);
 
   return {
-    pages: pages.map((_page, i) => transformPage(data, i, options)),
+    pages: pages.map((_page, i) => transformPage(data, i, options))
   };
 }
 
@@ -53,18 +47,25 @@ export function transformDoc(harData: Har | Log, options: HarTransformerOptions)
  * @param  {number} startRelative - entry start time relative to the document in ms
  * @param  {boolean} isTLS
  */
-function toWaterFallEntry(entry: Entry, index: number, startRelative: number, isTLS: boolean): WaterfallEntry {
+function toWaterFallEntry(
+  entry: Entry,
+  index: number,
+  startRelative: number,
+  isTLS: boolean,
+  options: ChartOptions
+): WaterfallEntry {
   startRelative = Math.round(startRelative);
-  const endRelative = Math.round(toInt(entry._all_end) || (startRelative + entry.time));
+  const endRelative = Math.round(toInt(entry._all_end) || startRelative + entry.time);
   const requestType = mimeToRequestType(entry.response.content.mimeType);
   const indicators = collectIndicators(entry, index, isTLS, requestType);
   const responseDetails = createResponseDetails(entry, indicators);
-  return createWaterfallEntry(entry.request.url,
+  return createWaterfallEntry(
+    entry.request.url,
     startRelative,
     endRelative,
     buildDetailTimingBlocks(startRelative, entry),
     responseDetails,
-    makeTabs(entry, (index + 1), requestType, startRelative, endRelative, indicators),
+    makeTabs(entry, index + 1, requestType, startRelative, endRelative, indicators, options)
   );
 }
 
@@ -77,13 +78,15 @@ const getPages = (data: Log) => {
     const currDate = Date.parse(curr.startedDateTime);
     const earliestDate = Date.parse(earliest);
     return earliestDate < currDate ? earliest : curr.startedDateTime;
-  }, (data.entries[0] && data.entries[0].startedDateTime) );
-  return [{
-    id: "",
-    pageTimings: {},
-    startedDateTime: statedTime,
-    title: "n/a",
-  } as Page];
+  }, data.entries[0] && data.entries[0].startedDateTime);
+  return [
+    {
+      id: '',
+      pageTimings: {},
+      startedDateTime: statedTime,
+      title: 'n/a'
+    } as Page
+  ];
 };
 
 /**
@@ -93,11 +96,13 @@ const getPages = (data: Log) => {
  * @param {ChartOptions} options - HAR-parser-specific options
  * @returns WaterfallData
  */
-export function transformPage(harData: Har | Log,
-                              pageIndex: number = 0,
-                              options: ChartOptions): WaterfallData {
+export function transformPage(
+  harData: Har | Log,
+  pageIndex: number = 0,
+  options: ChartOptions
+): WaterfallData {
   // make sure it's the *.log base node
-  const data = (harData["log"] !== undefined ? harData["log"] : harData) as Log;
+  const data = (harData['log'] !== undefined ? harData['log'] : harData) as Log;
 
   const pages = getPages(data);
   const currPage = pages[pageIndex];
@@ -107,12 +112,12 @@ export function transformPage(harData: Har | Log,
   let doneTime = 0;
   const isTLS = documentIsSecure(data.entries);
   const entries = data.entries
-    .filter((entry) => {
+    .filter(entry => {
       // filter inline data
-      if (entry.request.url.indexOf("data:") === 0 || entry.request.url.indexOf("javascript:") === 0) {
+      if (entry.request.url.indexOf('data:') === 0 || entry.request.url.indexOf('javascript:') === 0) {
         return false;
       }
-      if (pages.length === 1 && currPage.id === "") {
+      if (pages.length === 1 && currPage.id === '') {
         return true;
       }
       return entry.pageref === currPage.id;
@@ -125,12 +130,12 @@ export function transformPage(harData: Har | Log,
         // tslint:disable-next-line:no-console
         console.warn(`Entry has no valid 'startedDateTime' time`, entry.request.url, entry);
       }
-      return toWaterFallEntry(entry, index, startRelative, isTLS);
+      return toWaterFallEntry(entry, index, startRelative, isTLS, options);
     });
 
   const marks = getMarks(pageTimings, currPage, options);
   // if marks happens later than doneTime, increase the doneTime
-  marks.forEach((mark) => {
+  marks.forEach(mark => {
     if (mark.startTime > doneTime) {
       doneTime = mark.startTime;
     }
@@ -149,7 +154,7 @@ export function transformPage(harData: Har | Log,
     durationMs: doneTime,
     entries,
     marks,
-    title: currPage.title,
+    title: currPage.title
   };
 }
 
@@ -165,19 +170,20 @@ const getMarks = (pageTimings: PageTiming, currPage: Page, options: ChartOptions
   }
   const sortFn = (a: Mark, b: Mark) => a.startTime - b.startTime;
   const marks = Object.keys(pageTimings)
-    .filter((k) => (typeof pageTimings[k] === "number" && pageTimings[k] >= 0))
-    .map((k) => ({
-      name: `${escapeHtml(k.replace(/^[_]/, ""))} (${roundNumber(pageTimings[k], 0)} ms)`,
-      startTime: pageTimings[k],
-    } as Mark));
+    .filter(k => typeof pageTimings[k] === 'number' && pageTimings[k] >= 0)
+    .map(
+      k =>
+        ({
+          name: `${escapeHtml(k.replace(/^[_]/, ''))} (${roundNumber(pageTimings[k], 0)} ms)`,
+          startTime: pageTimings[k]
+        } as Mark)
+    );
 
   if (!options.showUserTiming) {
     return marks.sort(sortFn);
   }
 
-  return getUserTimings(currPage, options)
-    .concat(marks)
-    .sort(sortFn);
+  return getUserTimings(currPage, options).concat(marks).sort(sortFn);
 };
 
 /**
@@ -186,17 +192,14 @@ const getMarks = (pageTimings: PageTiming, currPage: Page, options: ChartOptions
  * @param {ChartOptions} options - HAR options
  */
 const getUserTimings = (currPage: Page, options: ChartOptions) => {
-  const baseFilter = options.showUserTimingEndMarker ?
-    (k: string) => k.indexOf("_userTime.") === 0 :
-    (k: string) => k.indexOf("_userTime.") === 0 && k.indexOf("_userTime.endTimer-") !== 0;
+  const baseFilter = options.showUserTimingEndMarker
+    ? (k: string) => k.indexOf('_userTime.') === 0
+    : (k: string) => k.indexOf('_userTime.') === 0 && k.indexOf('_userTime.endTimer-') !== 0;
   let filterFn = baseFilter;
 
   if (Array.isArray(options.showUserTiming)) {
     const findTimings = options.showUserTiming;
-    filterFn = (k: string) => (
-      baseFilter(k) &&
-      findTimings.indexOf(k.replace(/^_userTime\./, "")) >= 0
-    );
+    filterFn = (k: string) => baseFilter(k) && findTimings.indexOf(k.replace(/^_userTime\./, '')) >= 0;
   }
 
   const findName = /^_userTime\.((?:startTimer-)?(.+))$/;
@@ -214,20 +217,20 @@ const getUserTimings = (currPage: Page, options: ChartOptions) => {
       duration = currPage[`_userTime.endTimer-${name}`] - currPage[k];
       return {
         duration,
-        name: `${options.showUserTimingEndMarker ? fullName : name} (${currPage[k]} - ${currPage[k] + duration} ms)`,
-        startTime: currPage[k],
+        name: `${options.showUserTimingEndMarker ? fullName : name} (${currPage[k]} - ${
+          currPage[k] + duration
+        } ms)`,
+        startTime: currPage[k]
         // x: currPage[k],
       } as UserTiming;
     }
     return {
       name: fullName,
-      startTime: currPage[k],
+      startTime: currPage[k]
     } as UserTiming;
   };
 
-  return Object.keys(currPage)
-    .filter(filterFn)
-    .map(extractUserTiming);
+  return Object.keys(currPage).filter(filterFn).map(extractUserTiming);
 };
 
 /**
@@ -239,7 +242,7 @@ const getUserTimings = (currPage: Page, options: ChartOptions) => {
  */
 const buildDetailTimingBlocks = (startRelative: number, harEntry: Entry): WaterfallEntryTiming[] => {
   const t = harEntry.timings;
-  const types: TimingType[] = ["blocked", "dns", "connect", "send", "wait", "receive"];
+  const types: TimingType[] = ['blocked', 'dns', 'connect', 'send', 'wait', 'receive'];
   return types.reduce((collect: WaterfallEntryTiming[], key: TimingType) => {
     const time = getTimePair(key, harEntry, collect, startRelative);
 
@@ -249,12 +252,12 @@ const buildDetailTimingBlocks = (startRelative: number, harEntry: Entry): Waterf
 
     // special case for 'connect' && 'ssl' since they share time
     // http://www.softwareishard.com/blog/har-12-spec/#timings
-    if (key === "connect" && t.ssl && t.ssl !== -1) {
+    if (key === 'connect' && t.ssl && t.ssl !== -1) {
       const sslStart = parseInt(`${harEntry[`_ssl_start`]}`, 10) || time.start;
       const sslEnd = parseInt(`${harEntry[`_ssl_end`]}`, 10) || time.start + t.ssl;
-      const connectStart = (!!parseInt(`${harEntry[`_ssl_start`]}`, 10)) ? time.start : sslEnd;
+      const connectStart = !!parseInt(`${harEntry[`_ssl_start`]}`, 10) ? time.start : sslEnd;
       return collect
-        .concat([createWaterfallEntryTiming("ssl", Math.round(sslStart), Math.round(sslEnd))])
+        .concat([createWaterfallEntryTiming('ssl', Math.round(sslStart), Math.round(sslEnd))])
         .concat([createWaterfallEntryTiming(key, Math.round(connectStart), Math.round(time.end))]);
     }
 
@@ -271,22 +274,35 @@ const buildDetailTimingBlocks = (startRelative: number, harEntry: Entry): Waterf
  * @param  {number} startRelative - Number of milliseconds since page load started (`page.startedDateTime`)
  * @returns {Object}
  */
-const getTimePair = (key: string, harEntry: Entry, collect: WaterfallEntryTiming[], startRelative: number) => {
+const getTimePair = (
+  key: string,
+  harEntry: Entry,
+  collect: WaterfallEntryTiming[],
+  startRelative: number
+) => {
   let wptKey;
   switch (key) {
-    case "wait": wptKey = "ttfb"; break;
-    case "receive": wptKey = "download"; break;
-    default: wptKey = key;
+    case 'wait':
+      wptKey = 'ttfb';
+      break;
+    case 'receive':
+      wptKey = 'download';
+      break;
+    default:
+      wptKey = key;
   }
   const preciseStart = parseInt(harEntry[`_${wptKey}_start`], 10);
   const preciseEnd = parseInt(harEntry[`_${wptKey}_end`], 10);
-  const start = isNaN(preciseStart) ?
-    ((collect.length > 0) ? collect[collect.length - 1].end : startRelative) : preciseStart;
-  const end = isNaN(preciseEnd) ? (start + harEntry.timings[key]) : preciseEnd;
+  const start = isNaN(preciseStart)
+    ? collect.length > 0
+      ? collect[collect.length - 1].end
+      : startRelative
+    : preciseStart;
+  const end = isNaN(preciseEnd) ? start + harEntry.timings[key] : preciseEnd;
 
   return {
     end: Math.round(end),
-    start: Math.round(start),
+    start: Math.round(start)
   };
 };
 
@@ -297,7 +313,10 @@ const getTimePair = (key: string, harEntry: Entry, collect: WaterfallEntryTiming
  * @param  {WaterfallEntryIndicator[]} indicators
  * @returns WaterfallResponseDetails
  */
-const createResponseDetails = (entry: Entry, indicators: WaterfallEntryIndicator[]): WaterfallResponseDetails => {
+const createResponseDetails = (
+  entry: Entry,
+  indicators: WaterfallEntryIndicator[]
+): WaterfallResponseDetails => {
   const requestType = mimeToRequestType(entry.response.content.mimeType);
   const statusClean = toInt(entry.response.status) || 0;
   return {
@@ -305,6 +324,6 @@ const createResponseDetails = (entry: Entry, indicators: WaterfallEntryIndicator
     indicators,
     requestType,
     rowClass: makeRowCssClasses(statusClean),
-    statusCode: statusClean,
+    statusCode: statusClean
   };
 };

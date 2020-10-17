@@ -1,4 +1,5 @@
-import { WaterfallDocs } from "./waterfall";
+import { Entry } from 'har-format';
+import { WaterfallDocs, WaterfallEntry } from './waterfall';
 
 export interface ChartRenderOption {
   /** Height of every request bar block plus spacer pixel (in px) */
@@ -19,6 +20,7 @@ export interface ChartRenderOption {
   legendHolder: HTMLElement;
   /** Callback called when the HAR doc has been parsed into PerfCascases */
   onParsed: (data: WaterfallDocs) => void;
+  onEntryParsed?: (entry: WaterfallEntry) => void;
   /** Set a row length time in ms (if not set the time is calculated from the HAR)  */
   fixedLengthMs: number;
 }
@@ -33,6 +35,16 @@ export interface HarTransformerOptions {
    * _requires `showUserTiming` to be `true`_
    */
   showUserTimingEndMarker: boolean;
+
+  getTabPlugins?: (
+    entry: Entry,
+    defaultPlugins: (string | TabPluginConfig)[]
+  ) => (string | TabPluginConfig)[];
+}
+
+export interface TabPluginConfig {
+  use: string;
+  label: string;
 }
 
 /** TypeDefinition for `fromHar`'s options */

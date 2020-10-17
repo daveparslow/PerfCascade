@@ -197,10 +197,10 @@ export function validateOptions(options: ChartRenderOption): ChartRenderOption {
     if (val === undefined) {
       throw TypeError(`option "${name}" needs to be a number`);
     }
-    options[name] = val;
+    options[name as string] = val;
   };
   const ensureBoolean = (name: keyof ChartRenderOption) => {
-    options[name] = !!options[name];
+    options[name as string] = !!options[name];
   };
 
   validateInt('leftColumnWidth');
