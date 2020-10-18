@@ -146,10 +146,10 @@ export function makeTimingsTabPlugin(
   startRelative: number,
   endRelative: number,
   _indicators: WaterfallEntryIndicator[],
-  config: TabPluginConfig
+  config?: TabPluginConfig
 ) {
   const timings = parseTimings(entry, startRelative, endRelative);
-  return makeLazyWaterfallEntryTab(config.label || 'Timings', () => definitionList(timings, true));
+  return makeLazyWaterfallEntryTab(config?.label || 'Timings', () => definitionList(timings, true));
 }
 
 export function makeImageTabPlugin(
@@ -268,12 +268,10 @@ export function definitionList(dlKeyValues: SafeKvTuple[], addClass: boolean = f
   };
 
   const result = dlKeyValues.map(tuple => (
-    <>
-      <dt key={`${tuple[0]}-dt`} className={makeClass(tuple[0])}>
-        {tuple[0]}
-      </dt>
-      <dd key={`${tuple[0]}-dd`}>{tuple[1]}</dd>
-    </>
+    <React.Fragment key={`${tuple[0]}-dt`}>
+      <dt className={makeClass(tuple[0])}>{tuple[0] + ''}</dt>
+      <dd>{tuple[1] + ''}</dd>
+    </React.Fragment>
   ));
 
   return <>{result}</>;
