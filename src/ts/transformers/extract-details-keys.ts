@@ -44,7 +44,17 @@ const format: IDateTimeFormatOptions = {
   year: 'numeric'
 };
 
-export function parseGeneralDetails(entry: Entry, startRelative: number, requestID: number): SafeKvTuple[] {
+export function parseGeneralDetails(
+  entry: Entry,
+  startRelative: number,
+  requestID: number,
+  reduceTuples: (tuples: KvTuple[], tuple: KvTuple, index: number, array: KvTuple[]) => KvTuple[] = (
+    _tupes,
+    _tuple,
+    _index,
+    array
+  ) => array
+): SafeKvTuple[] {
   return ([
     ['Request Number', `#${requestID}`],
     [
@@ -77,7 +87,9 @@ export function parseGeneralDetails(entry: Entry, startRelative: number, request
     byteSizeProperty('Minify Save', entry._minify_save),
     byteSizeProperty('Image Total', entry._image_total),
     byteSizeProperty('Image Save', entry._image_save)
-  ] as KvTuple[]).filter(notEmpty) as SafeKvTuple[];
+  ] as KvTuple[])
+    .reduce(reduceTuples, [])
+    .filter(notEmpty) as SafeKvTuple[];
 }
 
 export function parseRequestDetails(harEntry: Entry): SafeKvTuple[] {
@@ -187,12 +199,18 @@ export function parseTimings(entry: Entry, start: number, end: number): SafeKvTu
 
 export function parseRequestHeaders(entry: Entry) {
   const requestHeaders = entry.request.headers;
-  const headerToKvTuple = (header: Header): KvTuple => [header.name, header.value];
+  const headerToKvTuple = (header: Header): KvTuple => [
+    header.name,
+    typeof header.value === 'object' ? JSON.stringify(header.value) : header.value
+  ];
   return requestHeaders.map(headerToKvTuple).filter(notEmpty) as SafeKvTuple[];
 }
 
 export function parseResponseHeaders(entry: Entry) {
   const responseHeaders = entry.response.headers;
-  const headerToKvTuple = (header: Header): KvTuple => [header.name, header.value];
+  const headerToKvTuple = (header: Header): KvTuple => [
+    header.name,
+    typeof header.value === 'object' ? JSON.stringify(header.value) : header.value
+  ];
   return responseHeaders.map(headerToKvTuple).filter(notEmpty) as SafeKvTuple[];
 }

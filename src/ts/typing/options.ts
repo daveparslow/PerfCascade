@@ -1,5 +1,5 @@
 import { Entry } from 'har-format';
-import { WaterfallDocs, WaterfallEntry } from './waterfall';
+import { KvTuple, RequestType, WaterfallDocs, WaterfallEntry, WaterfallEntryIndicator } from './waterfall';
 
 export interface ChartRenderOption {
   /** Height of every request bar block plus spacer pixel (in px) */
@@ -36,6 +36,14 @@ export interface HarTransformerOptions {
    */
   showUserTimingEndMarker: boolean;
 
+  getIndicators?: (
+    entry: Entry,
+    requestID: number,
+    requestType: RequestType,
+    startRelative: number,
+    endRelative: number
+  ) => WaterfallEntryIndicator[];
+
   getTabPlugins?: (
     entry: Entry,
     defaultPlugins: (string | TabPluginConfig)[]
@@ -44,7 +52,9 @@ export interface HarTransformerOptions {
 
 export interface TabPluginConfig {
   use: string;
-  label: string;
+  label?: string;
+  isNetwork?: boolean;
+  reduceTuples?: (tuples: KvTuple[], tuple: KvTuple, index: number, array: KvTuple[]) => KvTuple[];
 }
 
 /** TypeDefinition for `fromHar`'s options */

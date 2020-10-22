@@ -107,7 +107,7 @@ export function makeGeneralTabPlugin(
   indicators: WaterfallEntryIndicator[],
   config: TabPluginConfig
 ) {
-  const general = parseGeneralDetails(entry, startRelative, requestID);
+  const general = parseGeneralDetails(entry, startRelative, requestID, config?.reduceTuples);
   return makeGeneralTab(general, indicators, config);
 }
 
@@ -284,8 +284,8 @@ function makeRequestTab(
 ): WaterfallEntryTab {
   return makeLazyWaterfallEntryTab(config?.label || 'Request', () => (
     <>
-      <dl>{definitionList(request)}</dl>
-      <h2>All Response Headers</h2>
+      {!config || config.isNetwork ? <dl>{definitionList(request)}</dl> : null}
+      {!config || config.isNetwork ? <h2>All Request Headers</h2> : null}
       <dl>{definitionList(requestHeaders)}</dl>
     </>
   ));
@@ -298,8 +298,8 @@ function makeResponseTab(
 ): WaterfallEntryTab {
   return makeLazyWaterfallEntryTab(config?.label || 'Response', () => (
     <>
-      <dl>{definitionList(response)}</dl>
-      <h2>All Response Headers</h2>
+      {!config || config.isNetwork ? <dl>{definitionList(response)}</dl> : null}
+      {!config || config.isNetwork ? <h2>All Response Headers</h2> : null}
       <dl>{definitionList(responseHeaders)}</dl>
     </>
   ));

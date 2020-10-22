@@ -57,7 +57,11 @@ function toWaterFallEntry(
   startRelative = Math.round(startRelative);
   const endRelative = Math.round(toInt(entry._all_end) || startRelative + entry.time);
   const requestType = mimeToRequestType(entry.response.content.mimeType);
-  const indicators = collectIndicators(entry, index, isTLS, requestType);
+  const requestID = index + 1;
+  const indicators =
+    (options?.getIndicators &&
+      options?.getIndicators(entry, requestID, requestType, startRelative, endRelative)) ||
+    collectIndicators(entry, index, isTLS, requestType);
   const responseDetails = createResponseDetails(entry, indicators);
   return createWaterfallEntry(
     entry.request.url,
@@ -65,7 +69,7 @@ function toWaterFallEntry(
     endRelative,
     buildDetailTimingBlocks(startRelative, entry),
     responseDetails,
-    makeTabs(entry, index + 1, requestType, startRelative, endRelative, indicators, options)
+    makeTabs(entry, requestID, requestType, startRelative, endRelative, indicators, options)
   );
 }
 
