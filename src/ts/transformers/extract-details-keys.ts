@@ -44,12 +44,34 @@ const format: IDateTimeFormatOptions = {
   year: 'numeric'
 };
 
+function timeConversion(milliseconds: number): string {
+  var seconds = milliseconds / 1000;
+
+  var minutes = milliseconds / (1000 * 60);
+
+  var hours = milliseconds / (1000 * 60 * 60);
+
+  var days = (milliseconds / (1000 * 60 * 60 * 24)).toFixed(1);
+
+  if (milliseconds < 1000) {
+    return milliseconds + ' ms';
+  } else if (seconds < 60) {
+    return seconds.toFixed(1) + ' sec';
+  } else if (minutes < 60) {
+    return minutes.toFixed(1) + ' min';
+  } else if (hours < 24) {
+    return hours.toFixed(1) + ' hr';
+  } else {
+    return days + ' days';
+  }
+}
+
 export function parseGeneralDetails(
   entry: Entry,
   startRelative: number,
   requestID: number,
   reduceTuples: (tuples: KvTuple[], tuple: KvTuple, index: number, array: KvTuple[]) => KvTuple[] = (
-    _tupes,
+    _tuples,
     _tuple,
     _index,
     array
@@ -60,7 +82,7 @@ export function parseGeneralDetails(
     [
       'Started',
       new Date(entry.startedDateTime).toLocaleString(undefined, format) +
-        (startRelative > 0 ? ' (' + formatMilliseconds(startRelative) + ' after page request started)' : '')
+        (startRelative > 0 ? ' (' + timeConversion(startRelative) + ' after page request started)' : '')
     ],
     ['Duration', formatMilliseconds(entry.time)],
     ['Error/Status Code', entry.response.status + ' ' + entry.response.statusText],
