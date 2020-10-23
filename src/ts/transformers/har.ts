@@ -58,10 +58,20 @@ function toWaterFallEntry(
   const endRelative = Math.round(toInt(entry._all_end) || startRelative + entry.time);
   const requestType = mimeToRequestType(entry.response.content.mimeType);
   const requestID = index + 1;
+  const getDefaultIndicators = () => {
+    return collectIndicators(entry, index, isTLS, requestType);
+  };
   const indicators =
     (options?.getIndicators &&
-      options?.getIndicators(entry, requestID, requestType, startRelative, endRelative)) ||
-    collectIndicators(entry, index, isTLS, requestType);
+      options?.getIndicators(
+        entry,
+        requestID,
+        requestType,
+        startRelative,
+        endRelative,
+        getDefaultIndicators
+      )) ||
+    getDefaultIndicators();
   const responseDetails = createResponseDetails(entry, indicators);
   return createWaterfallEntry(
     entry.request.url,

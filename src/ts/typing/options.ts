@@ -41,7 +41,8 @@ export interface HarTransformerOptions {
     requestID: number,
     requestType: RequestType,
     startRelative: number,
-    endRelative: number
+    endRelative: number,
+    getDefaultIndicators: () => WaterfallEntryIndicator[]
   ) => WaterfallEntryIndicator[];
 
   getTabPlugins?: (

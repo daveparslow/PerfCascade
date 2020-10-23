@@ -1,0 +1,6 @@
+src/*
+build-utils/*
+build/*
+.eslintrc.base.js
+.prettierrc.json
+ .vscode/settings.json
