@@ -3,6 +3,7 @@ import { Entry } from 'har-format';
 import { pluralize, toCssClass } from '../helpers/misc';
 import { sanitizeUrlForLink } from '../helpers/parse';
 import {
+  KvReactTuple,
   RequestType,
   SafeKvTuple,
   TabReactRenderer,
@@ -149,7 +150,9 @@ export function makeTimingsTabPlugin(
   config?: TabPluginConfig
 ) {
   const timings = parseTimings(entry, startRelative, endRelative);
-  return makeLazyWaterfallEntryTab(config?.label || 'Timings', () => definitionList(timings, true));
+  return makeLazyWaterfallEntryTab(config?.label || 'Timings', () =>
+    definitionList('timings', timings, true)
+  );
 }
 
 export function makeImageTabPlugin(
@@ -217,7 +220,41 @@ function makeGeneralTab(
   indicators: WaterfallEntryIndicator[],
   config?: TabPluginConfig
 ): WaterfallEntryTab {
-  const mainContent = definitionList(generalData);
+  const groupedData = generalData.reduce(
+    (results, [key, value, ...rest]) => {
+      const parts = key.split('.');
+      const propName = parts.pop()!;
+      const groupKey = parts.join('.') || 'general';
+      const groupName = parts.pop() || 'general';
+      let group = results[groupKey];
+      if (!group) {
+        group = { label: groupName, data: [] };
+        results[groupKey] = group;
+      }
+      group.data.push([propName, value, ...rest]);
+
+      return results;
+    },
+    { general: { label: 'General', data: [] } } as {
+      [section: string]: { label: string; data: SafeKvTuple[] };
+    }
+  );
+
+  const mainContent = (
+    <div>
+      {Object.getOwnPropertyNames(groupedData).map(groupName => {
+        const group = groupedData[groupName];
+
+        return (
+          <div key={`generalTab-${groupName}`}>
+            <h2>{group.label}</h2>
+            <dl>{definitionList(groupName, group.data)}</dl>
+          </div>
+        );
+      })}
+    </div>
+  );
+
   if (indicators.length === 0) {
     return makeLazyWaterfallEntryTab(config?.label || 'General', () => mainContent);
   }
@@ -237,28 +274,31 @@ function makeGeneralTab(
       {errors.length > 0 ? (
         <>
           <h2 className="no-border">{pluralize('Error', errors.length)}</h2>
-          <dl>{definitionList(errors)}</dl>
+          <dl>{definitionList('errors', errors)}</dl>
         </>
       ) : null}
       {warnings.length > 0 ? (
         <>
           <h2 className="no-border">{pluralize('Warning', warnings.length)}</h2>
-          <dl>{definitionList(warnings)}</dl>
+          <dl>{definitionList('warnings', warnings)}</dl>
         </>
       ) : null}
       {info.length > 0 ? (
         <>
           <h2 className="no-border">Info</h2>
-          <dl>{definitionList(info)}</dl>
+          <dl>{definitionList('info', info)}</dl>
         </>
       ) : null}
-      <h2>General</h2>
-      <dl>{mainContent}</dl>
+      {mainContent}
     </>
   ));
 }
 
-export function definitionList(dlKeyValues: SafeKvTuple[], addClass: boolean = false): JSX.Element {
+export function definitionList(
+  prefix: string,
+  dlKeyValues: SafeKvTuple[],
+  addClass: boolean = false
+): JSX.Element {
   const makeClass = (key: string) => {
     if (!addClass) {
       return '';
@@ -267,12 +307,18 @@ export function definitionList(dlKeyValues: SafeKvTuple[], addClass: boolean = f
     return `class="${className}"`;
   };
 
-  const result = dlKeyValues.map(tuple => (
-    <React.Fragment key={`${tuple[0]}-dt`}>
-      <dt className={makeClass(tuple[0])}>{tuple[0] + ''}</dt>
-      <dd>{tuple[1] + ''}</dd>
-    </React.Fragment>
-  ));
+  const result = dlKeyValues.map(tuple => {
+    const element = ((tuple as unknown) as KvReactTuple)[2];
+    if (element || tuple.length > 2) {
+      debugger;
+    }
+    return (
+      <React.Fragment key={`${prefix}-${tuple[0]}-dt`}>
+        <dt className={makeClass(tuple[0])}>{tuple[0] + ''}</dt>
+        <dd>{element || tuple[1] + ''}</dd>
+      </React.Fragment>
+    );
+  });
 
   return <>{result}</>;
 }
@@ -284,9 +330,9 @@ function makeRequestTab(
 ): WaterfallEntryTab {
   return makeLazyWaterfallEntryTab(config?.label || 'Request', () => (
     <>
-      {!config || config.isNetwork ? <dl>{definitionList(request)}</dl> : null}
+      {!config || config.isNetwork ? <dl>{definitionList('request', request)}</dl> : null}
       {!config || config.isNetwork ? <h2>All Request Headers</h2> : null}
-      <dl>{definitionList(requestHeaders)}</dl>
+      <dl>{definitionList('request-headers', requestHeaders)}</dl>
     </>
   ));
 }
@@ -298,9 +344,9 @@ function makeResponseTab(
 ): WaterfallEntryTab {
   return makeLazyWaterfallEntryTab(config?.label || 'Response', () => (
     <>
-      {!config || config.isNetwork ? <dl>{definitionList(response)}</dl> : null}
+      {!config || config.isNetwork ? <dl>{definitionList('response', response)}</dl> : null}
       {!config || config.isNetwork ? <h2>All Response Headers</h2> : null}
-      <dl>{definitionList(responseHeaders)}</dl>
+      <dl>{definitionList('responseHeaders', responseHeaders)}</dl>
     </>
   ));
 }

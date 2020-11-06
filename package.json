@@ -1,6 +1,6 @@
 {
   "name": "@daveparslow/perf-cascade",
-  "version": "2.8.1",
+  "version": "2.8.2",
   "description": "Har file visualizer",
   "main": "./main/index.js",
   "module": "./main/index.js",

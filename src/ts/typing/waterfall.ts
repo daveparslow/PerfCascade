@@ -138,3 +138,4 @@ export interface Icon {
 export type KvTuple = [string, string | undefined];
 /** Key/Value pair in array `["key", "value"]` that promises to have both strings defined */
 export type SafeKvTuple = [string, string];
+export type KvReactTuple = [string, string, JSX.Element | undefined];
